@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using AspNetCoreTodo.Models;
 
-namespace AspNetCoreTodo.Services
+namespace AspNetCoreTodo.Interfaces
 {
     public interface ITodoItemService
     {
