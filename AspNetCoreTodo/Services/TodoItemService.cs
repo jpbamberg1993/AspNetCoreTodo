@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AspNetCoreTodo.Data;
 using AspNetCoreTodo.Interfaces;
 using AspNetCoreTodo.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreTodo.Services
@@ -17,17 +18,18 @@ namespace AspNetCoreTodo.Services
             _context = context;
         }
 
-        public async Task<TodoItem[]> GetIncompleteItemsAsync()
+        public async Task<TodoItem[]> GetIncompleteItemsAsync(IdentityUser user)
         {
             return await _context.Items
-                .Where(x => x.IsDone == false)
+                .Where(x => x.IsDone == false && x.UserId == user.Id)
                 .ToArrayAsync();
         }
 
-        public async Task<bool> AddItemAsync(TodoItem newItem)
+        public async Task<bool> AddItemAsync(TodoItem newItem, IdentityUser currentUser)
         {
             newItem.Id = Guid.NewGuid();
             newItem.IsDone = false;
+            newItem.UserId = currentUser.Id;
 
             _context.Items.Add(newItem);
 
@@ -35,9 +37,9 @@ namespace AspNetCoreTodo.Services
             return saveResult == 1;
         }
 
-        public async Task<bool> MarkDoneAsync(Guid id)
+        public async Task<bool> MarkDoneAsync(Guid id, IdentityUser currentUser)
         {
-            var item = await _context.Items.SingleAsync(x => x.Id == id);
+            var item = await _context.Items.SingleAsync(x => x.Id == id && x.UserId == currentUser.Id);
 
             if (item == null) return false;
             
