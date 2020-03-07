@@ -9,8 +9,8 @@ namespace AspNetCoreTodo.Interfaces
 {
     public interface ITodoItemService
     {
-        Task<TodoItem[]> GetIncompleteItemsAsync(IdentityUser user);
-        Task<bool> AddItemAsync(TodoItem newItem, IdentityUser currentUser);
-        Task<bool> MarkDoneAsync(Guid id, IdentityUser currentUser);
+        Task<TodoItem[]> GetIncompleteItemsAsync(ApplicationUser user);
+        Task<bool> AddItemAsync(TodoItem newItem, ApplicationUser currentUser);
+        Task<bool> MarkDoneAsync(Guid id, ApplicationUser currentUser);
     }
 }

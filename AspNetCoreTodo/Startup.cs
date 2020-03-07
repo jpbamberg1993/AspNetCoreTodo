@@ -4,18 +4,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using AspNetCoreTodo.Data;
 using AspNetCoreTodo.Interfaces;
 using AspNetCoreTodo.Models;
 using AspNetCoreTodo.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace AspNetCoreTodo
 {
@@ -31,19 +29,13 @@ namespace AspNetCoreTodo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-                .AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlite(
-                        Configuration.GetConnectionString("DefaultConnection")));
-            services
-                .AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
-            
-            services.AddTransient<IEmailSender, EmailSender>();
-            services.Configure<AuthMessageSenderOptions>(Configuration);
-            
-            services.AddControllersWithViews();
-            services.AddRazorPages();
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddDefaultIdentity<ApplicationUser>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
             
             services.Configure<IdentityOptions>(options =>
             {
@@ -76,15 +68,15 @@ namespace AspNetCoreTodo
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
                 options.SlidingExpiration = true;
             });
-            
+
+            // Add application services.
+            services.AddTransient<IEmailSender, EmailSender>();
+
             services.AddScoped<ITodoItemService, TodoItemService>();
-            
-            services.AddTransient<IOperationTransient, Operation>();
-            services.AddScoped<IOperationScoped, Operation>();
-            services.AddSingleton<IOperationSingleton, Operation>();
-            services.AddSingleton<IOperationSingletonInstance>(new Operation(Guid.Empty));
-            
-            services.AddTransient<OperationService, OperationService>();
+
+            services.AddAuthentication();
+
+            services.AddMvc(option => option.EnableEndpointRouting = false);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -98,10 +90,8 @@ namespace AspNetCoreTodo
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
             }
-            app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseRouting();
@@ -109,12 +99,11 @@ namespace AspNetCoreTodo
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            app.UseMvc(routes =>
             {
-                endpoints.MapControllerRoute(
+                routes.MapRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapRazorPages();
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }
