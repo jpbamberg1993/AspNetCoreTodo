@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using AspNetCoreTodo.Models;
@@ -31,6 +32,14 @@ namespace AspNetCoreTodo.Controllers
             };
 
             return View(model);
+        }
+
+        public async Task<IActionResult> Delete(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            await _userManager.DeleteAsync(user);
+
+            return RedirectToAction("Index");
         }
     }
 }

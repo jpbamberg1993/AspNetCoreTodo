@@ -1,3 +1,4 @@
+@using Microsoft.Extensions.Configuration.UserSecrets
 @model ManageUsersViewModel
 
 @{
@@ -31,6 +32,7 @@
     <tr>
         <td>Id</td>
         <td>Email</td>
+        <td>Delete</td>
     </tr>
     </thead>
     @foreach (var user in Model.Everyone)
@@ -38,6 +40,11 @@
         <tr>
             <td>@user.Id</td>
             <td>@user.Email</td>
+            <td>
+                <button type="button" onclick="location.href='@Url.Action("Delete", "ManageUsers", new { userId = user.Id })'">
+                    Delete
+                </button>
+            </td>
         </tr>
     }
 </table>
