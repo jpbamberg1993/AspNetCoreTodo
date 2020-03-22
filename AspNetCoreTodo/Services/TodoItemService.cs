@@ -39,14 +39,22 @@ namespace AspNetCoreTodo.Services
 
         public async Task<bool> MarkDoneAsync(Guid id, ApplicationUser currentUser)
         {
-            var item = await _context.Items.SingleAsync(x => x.Id == id && x.UserId == currentUser.Id);
+            try
+            {
+                var item = await _context.Items.SingleAsync(x => x.Id == id && x.UserId == currentUser.Id);
 
-            if (item == null) return false;
-            
-            item.IsDone = true;
+                if (item == null) return false;
+                
+                item.IsDone = true;
 
-            var saveResult = await _context.SaveChangesAsync();
-            return saveResult == 1;
+                var saveResult = await _context.SaveChangesAsync();
+                return saveResult == 1;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
         }
     }
 }
